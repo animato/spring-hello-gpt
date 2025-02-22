@@ -1,0 +1,2 @@
+spring.application.name=spring-hello-gpt
+openai.key=sk-***************************************
