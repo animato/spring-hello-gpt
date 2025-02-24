@@ -1,6 +1,31 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+
 
 ### GET /hello
 GET {{host}}/hello?q=안녕하세요
+
+### GET /hello
+GET {{host}}/hello?q=아까 말한 질문을 영어로 번역해 주세요 질문은 안녕하세요 입니다
+
+### GET /hello
+GET {{host}}/hello?q=일본어로 번역해 주세요
+
+### GET /hello-multiturn
+GET {{host}}/hello-multiturn?q=안녕하세요
+
+### GET /hello-multiturn
+GET {{host}}/hello-multiturn?q=아까 말한 질문을 영어로 번역해 주세요
+
+### GET /hello-multiturn
+GET {{host}}/hello-multiturn?q=아까 말한 질문이요
+
+### GET /hello-multiturn
+GET {{host}}/hello-multiturn?q=질문은 안녕하세요 입니다
+
+### GET /hello-multiturn
+GET {{host}}/hello-multiturn?q=일본어로 번역해 주세요
+
+### GET /hello-multiturn
+GET {{host}}/hello-multiturn?q=프랑스어로는 뭐라고 말하죠
+
+### GET /hello-multiturn
+GET {{host}}/hello-multiturn?q=우리가 무슨 맥락에서 대화를 하고 있나요
