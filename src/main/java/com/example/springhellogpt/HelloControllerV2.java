@@ -1,7 +1,10 @@
 package com.example.springhellogpt;
 
 import com.openai.client.OpenAIClient;
-import com.openai.models.*;
+import com.openai.models.ChatCompletion;
+import com.openai.models.ChatCompletionAssistantMessageParam;
+import com.openai.models.ChatCompletionCreateParams;
+import com.openai.models.ChatCompletionUserMessageParam;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
@@ -26,10 +28,10 @@ public class HelloControllerV2 {
     }
 
     @GetMapping("/hello-multiturn")
-    public String hello(HttpSession session, @RequestParam String q) {
+    public String hello(HttpSession session, @RequestParam String q, @RequestParam(defaultValue = "true") Boolean multiTurn) {
         SessionId sessionId = new SessionId(session.getId());
 
-        List<ChatMessagePair> list = sessionChatMsg.getOrDefault(sessionId, new ArrayList<>());
+        List<ChatMessagePair> list = (multiTurn) ? sessionChatMsg.getOrDefault(sessionId, new ArrayList<>()) : new ArrayList<>();
 
         ChatCompletionCreateParams.Builder builder = ChatCompletionCreateParams.builder();
         builder.model(OPENAI_MODEL_NAME).addSystemMessage("You are a helpful assistant.");
@@ -43,24 +45,20 @@ public class HelloControllerV2 {
 
         ChatCompletionCreateParams params = builder.addMessage(user).build();
 
-        CompletableFuture<ChatCompletion> chatCompletion = openAIClient.async().chat().completions().create(params);
+        ChatCompletion completion = openAIClient.async().chat().completions().create(params).join();
+        String message = completion.choices().getFirst().message().content().orElse("");
 
-        ChatCompletionMessage message = chatCompletion.join().choices().getFirst().message();
+        ChatCompletionAssistantMessageParam assistant = ChatCompletionAssistantMessageParam.builder().content(message).build();
 
-        ChatCompletionAssistantMessageParam assistant = ChatCompletionAssistantMessageParam.builder().content(message.content().orElse("")).build();
+        if (multiTurn) {
+            list.add(new ChatMessagePair(user, assistant));
+            sessionChatMsg.put(sessionId, list);
+            list.forEach(System.out::println);
+        }
 
-        list.add(new ChatMessagePair(user, assistant));
-        sessionChatMsg.put(sessionId, list);
-
-        list.forEach(ChatMessagePair::print);
-
-        return message.content().orElse("응답이 없습니다.");
+        return message;
     }
 
     public record SessionId(String id) {}
-    public record ChatMessagePair(ChatCompletionUserMessageParam user, ChatCompletionAssistantMessageParam assistant) {
-        public void print() {
-            System.out.println("user: " + user.content() + " -> assistant: " + assistant.content());
-        }
-    }
+    public record ChatMessagePair(ChatCompletionUserMessageParam user, ChatCompletionAssistantMessageParam assistant) {}
 }
