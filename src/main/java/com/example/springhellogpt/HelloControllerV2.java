@@ -1,5 +1,7 @@
 package com.example.springhellogpt;
 
+import com.example.springhellogpt.record.ChatMessagePair;
+import com.example.springhellogpt.record.SessionId;
 import com.openai.client.OpenAIClient;
 import com.openai.models.ChatCompletion;
 import com.openai.models.ChatCompletionAssistantMessageParam;
@@ -59,6 +61,4 @@ public class HelloControllerV2 {
         return message;
     }
 
-    public record SessionId(String id) {}
-    public record ChatMessagePair(ChatCompletionUserMessageParam user, ChatCompletionAssistantMessageParam assistant) {}
 }
